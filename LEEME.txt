@@ -1,0 +1,19 @@
+PORTAFOLIO DE ROBÓTICA Y PROGRAMACIÓN — cómo publicarlo en GitHub Pages
+
+1. En GitHub crea un repositorio nuevo, por ejemplo "robotica-primaria" (público).
+2. Sube el contenido de esta carpeta:
+     index.html
+     algoritmos-en-accion/index.html
+3. Copia también, desde tu repositorio de Montessori, las carpetas:
+     algoritmos/      (Algoritmos de todos los días)
+     computadora/     (La computadora y los datos)
+   Revisa que no mencionen el nombre de la escuela ni datos de alumnos.
+4. En el repositorio: Settings > Pages > Branch: main / (root) > Save.
+   En un par de minutos queda en: https://griotpablo.github.io/robotica-primaria/
+
+VIDEOJUEGO DE MAKECODE ARCADE
+1. En arcade.makecode.com abre tu juego > Compartir > Publicar.
+2. Copia el código que aparece después de "makecode.com/" (ejemplo: _AbC123xyz).
+3. En index.html busca la línea:   const ARCADE_ID = "";
+   y pega el código entre las comillas:   const ARCADE_ID = "_AbC123xyz";
+4. Guarda y sube el archivo. El juego aparecerá jugable en la página.

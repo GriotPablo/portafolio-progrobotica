@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Algoritmos en acción</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#1d2433;--muted:#5b6476;--acc:#1f5fbf;--ok:#1a9b5c;--bad:#d64545;--goal:#f2b705;--wall:#3b4352;--line:#d9dfe9}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--acc);color:#fff;padding:14px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+header h1{font-size:22px;margin:0;flex:1}
+.tabs button{font-size:17px;padding:10px 16px;border:0;border-radius:10px;margin-left:6px;cursor:pointer;background:rgba(255,255,255,.18);color:#fff}
+.tabs button.on{background:#fff;color:var(--acc);font-weight:700}
+main{max-width:1150px;margin:0 auto;padding:18px}
+.panel{display:none}.panel.on{display:block}
+.row{display:flex;gap:20px;flex-wrap:wrap}
+.card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+h2{margin:.2em 0 .5em;font-size:22px}
+p.hint{color:var(--muted);margin:.2em 0 .8em;font-size:16px}
+#grid{display:grid;gap:4px;background:var(--line);padding:4px;border-radius:10px;width:min(460px,90vw);aspect-ratio:1}
+.cell{background:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:34px;position:relative}
+.cell.wall{background:var(--wall)}
+.cell.goal{background:#fff6d1}
+.cell.trail{background:#e4eeff}
+.robot{transition:transform .35s;display:inline-block;font-size:38px}
+.cmds button,.ctrl button{font-size:18px;padding:12px 14px;margin:4px;border-radius:10px;border:2px solid var(--acc);background:#fff;color:var(--acc);cursor:pointer;font-weight:600}
+.ctrl button.run{background:var(--acc);color:#fff}
+.ctrl button.danger{border-color:var(--bad);color:var(--bad)}
+#prog{min-height:70px;display:flex;flex-wrap:wrap;gap:6px;padding:8px;border:2px dashed var(--line);border-radius:10px;margin:8px 0}
+.tok{background:#eef3fb;border-radius:8px;padding:8px 10px;font-size:20px;font-weight:600}
+.tok.cur{background:var(--acc);color:#fff}
+.tok.err{background:var(--bad);color:#fff}
+#msg,#bmsg{font-size:20px;font-weight:700;min-height:30px;margin-top:8px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+select,input{font-size:18px;padding:8px;border-radius:8px;border:1px solid var(--line)}
+#strip{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;margin:12px 0}
+.n{font-size:14px;text-align:center;padding:6px 0;border-radius:5px;background:#e4eeff;transition:all .3s}
+.n.out{background:#eceff3;color:#b5bcc8}
+.n.mid{background:var(--goal);color:#000;font-weight:800;transform:scale(1.15)}
+.n.found{background:var(--ok);color:#fff;font-weight:800}
+.big{font-size:44px;font-weight:800}
+.counter{display:flex;gap:24px;flex-wrap:wrap}
+.counter div{background:#eef3fb;border-radius:12px;padding:10px 16px;font-size:18px}
+pre{background:#1d2433;color:#e8eefc;padding:14px;border-radius:10px;font-size:17px;line-height:1.5;overflow:auto}
+pre span{display:block;white-space:pre}
+pre .hl{background:#3a4a6b}
+#log td,#log th{padding:6px 4px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Algoritmos en acción</h1>
+  <div class="tabs">
+    <button id="t1" class="on" onclick="tab(1)">Primaria · Programa al robot</button>
+    <button id="t2" onclick="tab(2)">Secundaria · Búsqueda binaria</button>
+  </div>
+</header>
+<main>
+<section id="p1" class="panel on">
+  <div class="row">
+    <div class="card">
+      <h2>El robot y la meta</h2>
+      <p class="hint">El robot 🤖 solo entiende órdenes exactas. Llévalo a la estrella ⭐ sin chocar con los muros.</p>
+      <div id="grid"></div>
+    </div>
+    <div class="card" style="flex:1;min-width:300px">
+      <h2>Tu algoritmo</h2>
+      <p class="hint">Reto: <select id="lvl" onchange="loadLevel()"><option value="0">Nivel 1 · Pasillo</option><option value="1">Nivel 2 · Zigzag</option><option value="2">Nivel 3 · Laberinto</option></select></p>
+      <div class="cmds">
+        <button onclick="add('F')">⬆️ Avanzar</button>
+        <button onclick="add('L')">↩️ Girar izquierda</button>
+        <button onclick="add('R')">↪️ Girar derecha</button>
+      </div>
+      <div id="prog"></div>
+      <div class="ctrl">
+        <button class="run" onclick="run()">▶ Ejecutar</button>
+        <button onclick="undo()">⌫ Quitar último</button>
+        <button class="danger" onclick="clearProg()">✖ Borrar todo</button>
+      </div>
+      <div id="msg"></div>
+    </div>
+  </div>
+</section>
+
+<section id="p2" class="panel">
+  <div class="card">
+    <h2>Adivina el número del 1 al 100</h2>
+    <div class="ctrl" style="margin-bottom:8px">
+      <button id="mClase" class="run" onclick="setMode('clase')">🧑‍🏫 Modo clase (número en papel)</button>
+      <button id="mDemo" onclick="setMode('demo')">🤖 Demo automática</button>
+    </div>
+    <div id="classCtrl">
+      <p class="hint">Un alumno escribe un número del 1 al 100 en un papel sin mostrarlo. Tú preguntas lo que aparece abajo y presionas lo que responda.</p>
+      <div class="ctrl"><button class="run" onclick="newRound()">▶ Nueva ronda</button></div>
+      <div id="question" class="big" style="font-size:34px;margin:10px 0">Presiona «Nueva ronda» para empezar</div>
+      <div class="ctrl" id="answers" style="display:none">
+        <button onclick="answer('gt')">⬆ Es MAYOR</button>
+        <button onclick="answer('lt')">⬇ Es MENOR</button>
+        <button style="border-color:#1a9b5c;color:#1a9b5c" onclick="answer('eq')">✅ ¡Es ese!</button>
+      </div>
+    </div>
+    <div id="demoCtrl" style="display:none">
+      <p class="hint">Compara adivinar uno por uno contra partir el rango a la mitad en cada pregunta.</p>
+      <div class="ctrl">
+        Número secreto: <input id="secret" type="number" min="1" max="100" value="73" style="width:90px">
+        <button onclick="randSecret()">🎲 Al azar</button>
+        <button class="run" onclick="binary()">▶ Búsqueda binaria</button>
+        <button onclick="linear()">▶ Uno por uno</button>
+        <button class="danger" onclick="resetStrip()">↺ Reiniciar</button>
+      </div>
+    </div>
+    <div id="strip"></div>
+    <div class="counter">
+      <div>inicio = <b class="big" style="font-size:28px" id="vlo">1</b></div>
+      <div>fin = <b class="big" style="font-size:28px" id="vhi">100</b></div>
+      <div>mitad = <b class="big" style="font-size:28px" id="vmid">—</b></div>
+      <div>Preguntas: <span class="big" id="count">0</span></div>
+    </div>
+    <div id="bmsg"></div>
+  </div>
+  <div class="row" style="margin-top:16px">
+    <div class="card" style="flex:1.2;min-width:340px">
+      <h2>El algoritmo en pseudocódigo</h2>
+      <div class="ctrl">
+        <button onclick="reveal(1)">＋ Mostrar siguiente línea</button>
+        <button onclick="reveal(99)">Mostrar todo</button>
+        <button class="danger" onclick="reveal(0)">Ocultar</button>
+      </div>
+      <div class="ctrl"><button id="vNat" class="run" onclick="setVer('nat')">🗣️ En palabras</button><button id="vPse" onclick="setVer('pse')">💻 Pseudocódigo</button></div>
+<pre id="code"><span data-l="1" data-t="inicio = 1 ; fin = 100"></span><span data-l="2" data-t="mientras no lo encuentre:"></span><span data-l="3" data-t="    mitad = (inicio + fin) ÷ 2"></span><span data-l="4" data-t="    si secreto == mitad → ¡encontrado!"></span><span data-l="5" data-t="    si secreto &gt; mitad → inicio = mitad + 1"></span><span data-l="6" data-t="    si no               → fin = mitad - 1"></span></pre>
+    </div>
+    <div class="card" style="flex:1;min-width:300px">
+      <h2>Bitácora</h2>
+      <table id="log" style="width:100%;border-collapse:collapse;font-size:17px">
+        <thead><tr style="text-align:left;color:#5b6476"><th>#</th><th>inicio</th><th>fin</th><th>mitad</th><th>respuesta</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+</main>
+<script>
+function tab(n){for(const i of[1,2]){document.getElementById('p'+i).classList.toggle('on',i==n);document.getElementById('t'+i).classList.toggle('on',i==n)}}
+/* ---------- Robot ---------- */
+// Mapas: S=inicio, G=meta, #=muro, .=libre. dir inicial: 0=arriba,1=derecha,2=abajo,3=izquierda
+const LEVELS=[
+ {dir:0,map:[
+  "..G..",
+  "##.#.",
+  "...#.",
+  ".###.",
+  "S...."]},
+ {dir:0,map:[
+  "G..#..",
+  "##.#.#",
+  "......",
+  ".####.",
+  ".#..#.",
+  "S#.#.."]},
+ {dir:1,map:[
+  "S.#....",
+  "#.#.##.",
+  "#...#..",
+  "###.#.#",
+  "....#..",
+  ".#####.",
+  "......G"]}
+];
+const DR=[[-1,0],[0,1],[1,0],[0,-1]];
+let L, N, pos, prog=[], running=false;
+function find(ch){for(let r=0;r<N;r++){const c=L.map[r].indexOf(ch);if(c>=0)return[r,c]}}
+function loadLevel(){L=LEVELS[+document.getElementById('lvl').value];N=L.map.length;const st=find('S');L.start=[st[0],st[1],L.dir];L.goal=find('G');pos=[...L.start];prog=[];draw();renderProg();setMsg('')}
+function isWall(r,c){return L.map[r][c]=='#'}
+function draw(trail=[]){
+ const g=document.getElementById('grid');g.style.gridTemplateColumns=`repeat(${N},1fr)`;g.innerHTML='';
+ for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+  const d=document.createElement('div');d.className='cell';if(L.map[r][c]=='S')d.style.boxShadow='inset 0 0 0 3px #1a9b5c';
+  if(isWall(r,c))d.classList.add('wall');
+  if(L.goal[0]==r&&L.goal[1]==c){d.classList.add('goal');d.textContent='⭐'}
+  if(trail.some(t=>t[0]==r&&t[1]==c))d.classList.add('trail');
+  if(pos[0]==r&&pos[1]==c){d.innerHTML=`<span class="robot">🤖</span><span style="position:absolute;${['top:0;left:50%;transform:translateX(-50%)','right:2px;top:50%;transform:translateY(-50%)','bottom:0;left:50%;transform:translateX(-50%)','left:2px;top:50%;transform:translateY(-50%)'][pos[2]]};font-size:18px;color:#1f5fbf">${'▲▶▼◀'[pos[2]]}</span>`}
+  g.appendChild(d)}
+}
+function add(k){if(running)return;prog.push(k);renderProg()}
+function undo(){if(running)return;prog.pop();renderProg()}
+function clearProg(){if(running)return;prog=[];pos=[...L.start];renderProg();draw();setMsg('')}
+const LBL={F:'⬆️',L:'↩️',R:'↪️'};
+function renderProg(cur=-1,err=-1){document.getElementById('prog').innerHTML=prog.length?prog.map((k,i)=>`<span class="tok ${i==cur?'cur':''} ${i==err?'err':''}">${i+1}. ${LBL[k]}</span>`).join(''):'<span class="hint">Agrega instrucciones…</span>'}
+function setMsg(t,cls=''){const m=document.getElementById('msg');m.textContent=t;m.className=cls}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function run(){
+ if(running||!prog.length)return;running=true;pos=[...L.start];let trail=[[pos[0],pos[1]]];draw(trail);setMsg('Ejecutando…');
+ for(let i=0;i<prog.length;i++){
+  renderProg(i);await sleep(550);
+  const k=prog[i];
+  if(k=='L')pos[2]=(pos[2]+3)%4; else if(k=='R')pos[2]=(pos[2]+1)%4;
+  else{const nr=pos[0]+DR[pos[2]][0],nc=pos[1]+DR[pos[2]][1];
+   if(nr<0||nc<0||nr>=N||nc>=N||isWall(nr,nc)){renderProg(-1,i);setMsg(`¡Bug en el paso ${i+1}! El robot choca. ¿Cómo lo arreglamos?`,'bad');running=false;return}
+   pos=[nr,nc,pos[2]];trail.push([nr,nc])}
+  draw(trail)}
+ renderProg();
+ if(pos[0]==L.goal[0]&&pos[1]==L.goal[1])setMsg(`¡Llegó a la meta en ${prog.length} pasos! 🎉 ¿Se puede con menos?`,'ok');
+ else setMsg('El robot terminó, pero no llegó a la meta. Revisemos el algoritmo.','bad');
+ running=false}
+loadLevel();
+/* ---------- Búsqueda binaria ---------- */
+let busy=false, mode='clase', st=null, shown=0, ver='nat';
+const VER={
+ nat:["Empezamos con los números del 1 al 100","Repetimos hasta encontrarlo:","   Preguntamos por el número de en medio","   Si es ese → ¡lo encontramos!","   Si es mayor → nos quedamos con los de arriba","   Si es menor → nos quedamos con los de abajo"],
+ pse:["inicio ← 1     fin ← 100","mientras no lo encuentre:","    mitad ← (inicio + fin) / 2   (sin decimales)","    si secreto = mitad → ¡encontrado!","    si secreto > mitad → inicio ← mitad + 1","    si no              → fin ← mitad − 1"]};
+function setVer(v){ver=v;document.getElementById('vNat').classList.toggle('run',v=='nat');document.getElementById('vPse').classList.toggle('run',v=='pse');
+ document.querySelectorAll('#code span').forEach((sp,i)=>sp.dataset.t=VER[v][i]);reveal(-1)}
+function strip(){const s=document.getElementById('strip');s.innerHTML='';for(let i=1;i<=100;i++){const d=document.createElement('div');d.className='n';d.id='n'+i;d.textContent=i;s.appendChild(d)}}
+function setv(id,v){document.getElementById(id).textContent=v}
+function vars(lo,hi,mid){setv('vlo',lo);setv('vhi',hi);setv('vmid',mid)}
+function bm(t,c=''){const m=document.getElementById('bmsg');m.textContent=t;m.className=c}
+function hl(l){document.querySelectorAll('#code span').forEach(s=>s.classList.toggle('hl',+s.dataset.l==l))}
+function logRow(c,lo,hi,mid,r){const tr=document.createElement('tr');tr.style.borderTop='1px solid #d9dfe9';tr.innerHTML=`<td>${c}</td><td>${lo}</td><td>${hi}</td><td><b>${mid}</b></td><td>${r}</td>`;document.querySelector('#log tbody').appendChild(tr)}
+function resetStrip(){if(busy)return;strip();vars(1,100,'—');setv('count',0);bm('');hl(0);document.querySelector('#log tbody').innerHTML='';st=null;
+ document.getElementById('answers').style.display='none';document.getElementById('question').textContent='Presiona «Nueva ronda» para empezar'}
+function setMode(m){if(busy)return;mode=m;document.getElementById('classCtrl').style.display=m=='clase'?'':'none';document.getElementById('demoCtrl').style.display=m=='demo'?'':'none';
+ document.getElementById('mClase').classList.toggle('run',m=='clase');document.getElementById('mDemo').classList.toggle('run',m=='demo');resetStrip();reveal(m=='clase'?0:99)}
+function reveal(n){const sp=[...document.querySelectorAll('#code span')];shown=n==1?Math.min(shown+1,sp.length):(n==0?0:(n==-1?shown:sp.length));
+ sp.forEach((s,i)=>{s.textContent=i<shown?s.dataset.t:(i==shown?'    · · ·':'');s.style.opacity=i<shown?1:.45})}
+/* Modo clase */
+function newRound(){resetStrip();st={lo:1,hi:100,c:0};document.getElementById('answers').style.display='';hl(1);ask()}
+function ask(){st.mid=Math.floor((st.lo+st.hi)/2);st.c++;setv('count',st.c);vars(st.lo,st.hi,st.mid);
+ document.querySelectorAll('.n.mid').forEach(e=>e.classList.remove('mid'));document.getElementById('n'+st.mid).classList.add('mid');
+ document.getElementById('question').textContent=`¿Tu número es el ${st.mid}? ¿O es mayor o menor?`;hl(3);bm('')}
+function answer(r){if(!st)return;const {lo,hi,mid,c}=st;
+ if(r=='eq'){hl(4);logRow(c,lo,hi,mid,'✅ ¡es ese!');document.getElementById('n'+mid).className='n found';
+  document.getElementById('question').textContent=`¡Es el ${mid}! Encontrado en ${c} preguntas. 📄 ¡Muestra tu papel!`;document.getElementById('answers').style.display='none';bm(`Uno por uno habríamos necesitado hasta ${mid} preguntas.`,'ok');st=null;return}
+ document.getElementById('n'+mid).classList.remove('mid');
+ if(r=='gt'){hl(5);logRow(c,lo,hi,mid,'⬆ mayor');for(let i=lo;i<=mid;i++)document.getElementById('n'+i).classList.add('out');st.lo=mid+1}
+ else{hl(6);logRow(c,lo,hi,mid,'⬇ menor');for(let i=mid;i<=hi;i++)document.getElementById('n'+i).classList.add('out');st.hi=mid-1}
+ if(st.lo>st.hi){vars(st.lo,st.hi,'—');document.getElementById('question').textContent='🤔 Algo no cuadra: ya no quedan números posibles.';bm('Revisemos las respuestas en la bitácora: ¿alguna fue al revés?','bad');document.getElementById('answers').style.display='none';st=null;return}
+ setTimeout(ask,450)}
+/* Demo automática */
+function randSecret(){if(busy)return;document.getElementById('secret').value=1+Math.floor(Math.random()*100);resetStrip()}
+function sec(){let v=Math.round(+document.getElementById('secret').value);if(!(v>=1&&v<=100)){v=50;document.getElementById('secret').value=50}return v}
+async function binary(){
+ if(busy)return;resetStrip();busy=true;const x=sec();let lo=1,hi=100,c=0;hl(1);await sleep(700);
+ while(lo<=hi){
+  hl(2);await sleep(400);const mid=Math.floor((lo+hi)/2);c++;setv('count',c);vars(lo,hi,mid);
+  hl(3);document.getElementById('n'+mid).classList.add('mid');await sleep(1000);
+  if(mid==x){hl(4);logRow(c,lo,hi,mid,'✅ ¡es ese!');document.getElementById('n'+mid).className='n found';bm(`¡Encontrado: ${x}! Solo ${c} preguntas.`,'ok');break}
+  document.getElementById('n'+mid).classList.remove('mid');
+  if(x>mid){hl(5);logRow(c,lo,hi,mid,'⬆ mayor');for(let i=lo;i<=mid;i++)document.getElementById('n'+i).classList.add('out');lo=mid+1;bm(`Es MAYOR que ${mid} → descartamos de ${mid} hacia abajo`)}
+  else{hl(6);logRow(c,lo,hi,mid,'⬇ menor');for(let i=mid;i<=hi;i++)document.getElementById('n'+i).classList.add('out');hi=mid-1;bm(`Es MENOR que ${mid} → descartamos de ${mid} hacia arriba`)}
+  await sleep(1100)}
+ busy=false}
+async function linear(){
+ if(busy)return;resetStrip();busy=true;const x=sec();
+ for(let i=1;i<=x;i++){setv('count',i);vars(i,100,i);const e=document.getElementById('n'+i);
+  if(i==x){e.className='n found';bm(`Encontrado: ${x}, pero necesitamos ${i} preguntas. 😴`,'bad')}else e.classList.add('out');
+  await sleep(x>40?60:200)}
+ busy=false}
+strip();setVer('nat');reveal(0);
+</script>
+</body>
+</html>

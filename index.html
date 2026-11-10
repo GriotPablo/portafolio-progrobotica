@@ -1,54 +1,240 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Programación y Robótica · CEDU Montessori</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Robótica y programación educativa · Luis Pablo Murillo Tovar</title>
+<meta name="description" content="Portafolio de programación y robótica educativa para primaria alta y secundaria: actividades interactivas, proyectos y ruta de taller.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
+/* Layout: portafolio de una columna; hero, enfoque, actividades en tarjetas, ruta de bloques, sobre mí y contacto */
 :root{
-  /* Menú de recursos: fondo claro, tinta azul noche, acento jade; tarjetas por nivel. */
-  --bg:#F5F7F2; --surface:#FFFFFF; --ink:#1B2A3A; --muted:#5E6B78; --line:#D8DFD6; --accent:#0F8B6C; --warm:#F08A24;
-  --display:"Baloo 2",system-ui,sans-serif; --body:"Atkinson Hyperlegible",system-ui,sans-serif; color-scheme:light;
+  --bg:#f5f7fb; --surface:#ffffff; --ink:#14213d; --muted:#55607a; --line:#dbe1ec;
+  --accent:#1f6feb; --accent-ink:#ffffff; --block:#ff9f1c; --code:#0e9f6e; --soft:#eaf1fe;
+  --f-display:"Sora","Segoe UI",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
 }
-@media (prefers-color-scheme:dark){:root{--bg:#111A16;--surface:#1A2620;--ink:#E9F0EA;--muted:#9DB0A5;--line:#2F4038;--accent:#3FD1A6;--warm:#FFA552;color-scheme:dark}}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1524; --surface:#172036; --ink:#e8edf7; --muted:#a3aec6; --line:#2a3550;
+  --accent:#6ea8ff; --accent-ink:#0f1524; --block:#ffb547; --code:#34d399; --soft:#1d2a47; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1524; --surface:#172036; --ink:#e8edf7; --muted:#a3aec6; --line:#2a3550;
+  --accent:#6ea8ff; --accent-ink:#0f1524; --block:#ffb547; --code:#34d399; --soft:#1d2a47; color-scheme:dark}
 *{box-sizing:border-box}
-html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font:19px/1.5 var(--body)}
-main{max-width:960px;margin:0 auto;padding:36px 18px 48px}
-h1{font-family:var(--display);font-size:clamp(32px,5vw,48px);line-height:1.05;margin:0;text-wrap:balance}
-.sub{color:var(--muted);margin:8px 0 28px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
-a.card{display:grid;gap:8px;text-decoration:none;color:var(--ink);background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:20px}
-a.card:hover,a.card:focus-visible{border-color:var(--accent);outline:none}
-.tag{justify-self:start;font-size:14px;font-weight:700;color:var(--accent);border:2px solid var(--accent);border-radius:999px;padding:2px 10px}
-.card h2{font-family:var(--display);font-size:26px;margin:0;line-height:1.1}
-.card p{margin:0;color:var(--muted)}
-.go{font-weight:700;color:var(--warm)}
-footer{margin-top:32px;color:var(--muted);font-size:15px}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.wrap{max-width:980px;margin:0 auto;padding-block:40px 64px;display:flex;flex-direction:column;gap:56px}
+h1,h2,h3{font-family:var(--f-display);line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:clamp(1.9rem,5vw,2.8rem)}
+h2{font-size:1.5rem}
+h3{font-size:1.1rem}
+p{margin:0;max-width:66ch}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--block);outline-offset:3px;border-radius:6px}
+.tag{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+section{display:flex;flex-direction:column;gap:18px}
+/* hero */
+.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:32px;align-items:center}
+.hero .lede{color:var(--muted);font-size:1.12rem}
+.cta{display:flex;flex-wrap:wrap;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;font-weight:700;text-decoration:none;border:2px solid var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{color:var(--accent)}
+/* bloques tipo Scratch */
+.stack{display:flex;flex-direction:column;gap:6px;min-width:0}
+.blk{font-family:var(--f-mono);font-size:.9rem;padding:10px 14px;border-radius:8px;color:#1b1b1b;position:relative;width:fit-content;max-width:100%}
+.blk::before{content:"";position:absolute;left:18px;top:-6px;width:22px;height:6px;border-radius:4px 4px 0 0;background:inherit}
+.blk:first-child::before{display:none}
+.b1{background:#ffbf00} .b2{background:#4c97ff;color:#fff;margin-left:18px} .b3{background:#ffab19;margin-left:18px} .b4{background:#59c059;color:#fff;margin-left:36px} .b5{background:#4c97ff;color:#fff;margin-left:18px}
+/* enfoque */
+.pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.pillar{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.pillar p{color:var(--muted);font-size:.96rem}
+/* actividades */
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{color:var(--muted);font-size:.96rem}
+.card .go{margin-top:auto;font-weight:700;text-decoration:none}
+.lvl{display:inline-block;font-family:var(--f-mono);font-size:.74rem;padding:2px 10px;border-radius:999px;background:var(--soft);color:var(--accent);width:fit-content}
+.arcade{grid-column:1/-1}
+.frame{position:relative;width:100%;aspect-ratio:4/3;max-width:100%;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--soft);display:grid;place-items:center;text-align:center;padding:16px}
+.frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.frame.empty{aspect-ratio:auto;min-height:110px}
+.frame .ph{color:var(--muted);font-size:.95rem;max-width:40ch}
+@media (min-width:760px){.arcade .frame:not(.empty){aspect-ratio:16/9}}
+/* ruta */
+.route{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;counter-reset:b}
+.step{background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--block);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.step:nth-child(2){border-top-color:var(--accent)} .step:nth-child(3){border-top-color:var(--code)} .step:nth-child(4){border-top-color:var(--ink)}
+.step p{color:var(--muted);font-size:.92rem}
+.step .out{font-size:.88rem;color:var(--ink)}
+/* herramientas */
+.tools{display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:0;list-style:none}
+.tools li{font-family:var(--f-mono);font-size:.85rem;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+/* sobre mi */
+.about{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.about ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;color:var(--muted)}
+.contact{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between}
+.mail{font-family:var(--f-mono);font-size:.95rem;user-select:all}
+footer{color:var(--muted);font-size:.85rem;text-align:center}
+@media (max-width:760px){
+  .hero,.about{grid-template-columns:1fr}
+  .pillars,.cards{grid-template-columns:1fr}
+  .route{grid-template-columns:1fr 1fr}
+}
+@media (max-width:440px){.route{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<main>
-  <h1>Programación y Robótica</h1>
-  <p class="sub">CEDU Montessori · Ciclo 2026–2027. Elige la actividad que indique tu profesor.</p>
-  <div class="grid">
-    <a class="card" href="algoritmos/index.html">
-      <span class="tag">Primaria · 4°, 5° y 6°</span>
-      <h2>Algoritmos de todos los días</h2>
-      <p>Ordena los pasos para lavarte los dientes, preparar agua de limón y llevar a Robi a la nevería.</p>
-      <span class="go">Abrir actividad →</span>
-    </a>
-    <a class="card" href="computadora/index.html">
-      <span class="tag">Secundaria · 1°</span>
-      <h2>La computadora y los datos</h2>
-      <p>Partes de la computadora y un reto: ¿quién cuenta más rápido, el grupo o la computadora?</p>
-      <span class="go">Abrir actividad →</span>
-    </a>
-  </div>
-  <footer>Prof. Luis Pablo Murillo Tovar</footer>
-</main>
+<div class="wrap">
+
+  <header class="hero">
+    <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+      <span class="tag">Portafolio docente</span>
+      <h1>Programación y robótica para niñas y niños de primaria alta</h1>
+      <p class="lede">Talleres por proyectos en los que cada alumno pasa de ordenar instrucciones en papel a programar videojuegos y robots que funcionan.</p>
+      <div class="cta">
+        <a class="btn primary" href="#actividades">Ver actividades</a>
+        <a class="btn ghost" href="#contacto">Contacto</a>
+      </div>
+    </div>
+    <div class="stack" aria-label="Ejemplo de programa por bloques">
+      <div class="blk b1">al presionar ▶</div>
+      <div class="blk b2">repetir 4 veces</div>
+      <div class="blk b4">avanzar 10 pasos</div>
+      <div class="blk b4">girar 90°</div>
+      <div class="blk b3">si toca la meta entonces</div>
+      <div class="blk b5">decir "¡Lo logré!"</div>
+    </div>
+  </header>
+
+  <section aria-labelledby="h-enfoque">
+    <span class="tag">Cómo trabajo</span>
+    <h2 id="h-enfoque">Enfoque</h2>
+    <div class="pillars">
+      <div class="pillar">
+        <h3>Aprender haciendo</h3>
+        <p>Cada sesión parte de un reto concreto. Los equipos construyen, prueban, se equivocan y mejoran su solución.</p>
+      </div>
+      <div class="pillar">
+        <h3>Del papel al robot</h3>
+        <p>Primero algoritmos sin computadora, después programación por bloques y al final electrónica y robots.</p>
+      </div>
+      <div class="pillar">
+        <h3>Resultados visibles</h3>
+        <p>Cada bloque termina con un proyecto que los alumnos presentan a sus familias.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="actividades" aria-labelledby="h-act">
+    <span class="tag">Prueba las actividades</span>
+    <h2 id="h-act">Actividades interactivas</h2>
+    <div class="cards">
+      <article class="card">
+        <span class="lvl">4.º a 6.º de primaria</span>
+        <h3>Algoritmos en acción</h3>
+        <p>Los alumnos programan un robot para salir de un laberinto y descubren la búsqueda binaria adivinando un número del 1 al 100.</p>
+        <a class="go" href="algoritmos-en-accion/">Abrir “Algoritmos en acción” →</a>
+      </article>
+      <article class="card">
+        <span class="lvl">4.º a 6.º de primaria</span>
+        <h3>Algoritmos de todos los días</h3>
+        <p>Ordenar los pasos de tareas cotidianas, como lavarse los dientes o preparar agua de limón, para entender qué es un algoritmo.</p>
+        <a class="go" href="algoritmos/">Abrir “Algoritmos de todos los días” →</a>
+      </article>
+      <article class="card">
+        <span class="lvl">1.º de secundaria</span>
+        <h3>La computadora y los datos</h3>
+        <p>Las partes de una computadora y un reto: ¿quién cuenta más rápido, el grupo o la computadora?</p>
+        <a class="go" href="computadora/">Abrir “La computadora y los datos” →</a>
+      </article>
+      <article class="card">
+        <span class="lvl">Herramientas</span>
+        <h3>Con qué trabajamos</h3>
+        <ul class="tools">
+          <li>Scratch</li><li>MakeCode Arcade</li><li>Micro:bit</li><li>Python</li><li>App Inventor</li><li>Arduino</li><li>Lego</li>
+        </ul>
+      </article>
+      <article class="card arcade">
+        <span class="lvl">Proyecto de ejemplo</span>
+        <h3>Videojuego en MakeCode Arcade</h3>
+        <p>Un juego hecho con bloques, como el que los alumnos crean en el primer bloque del taller. Se juega con el teclado: flechas para moverse y la tecla A para actuar.</p>
+        <div class="frame empty" id="arcade-frame">
+          <p class="ph">Aquí aparecerá el videojuego cuando se publique en MakeCode Arcade.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-ruta">
+    <span class="tag">Propuesta de taller</span>
+    <h2 id="h-ruta">Ruta en cuatro bloques</h2>
+    <p>Cada bloque dura de 6 a 8 semanas y se puede contratar por separado.</p>
+    <div class="route">
+      <div class="step"><span class="tag">Bloque 1</span><h3>Programar desde cero</h3><p>Secuencias, ciclos, condiciones y eventos con Scratch y MakeCode.</p><span class="out">Proyecto: videojuego propio</span></div>
+      <div class="step"><span class="tag">Bloque 2</span><h3>Electrónica básica</h3><p>Micro:bit: luces, sonidos, botones y sensores.</p><span class="out">Proyecto: mascota electrónica</span></div>
+      <div class="step"><span class="tag">Bloque 3</span><h3>Robots en movimiento</h3><p>Motores, engranes y un robot que avanza, gira y esquiva.</p><span class="out">Proyecto: carrito robótico</span></div>
+      <div class="step"><span class="tag">Bloque 4</span><h3>Proyecto integrador</h3><p>Detectar un problema real y diseñar una solución.</p><span class="out">Proyecto: feria de robótica</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-yo">
+    <span class="tag">Quién imparte</span>
+    <h2 id="h-yo">Sobre mí</h2>
+    <div class="about">
+      <p>Soy Luis Pablo Murillo Tovar. Enseño programación y robótica a alumnos de primaria alta y secundaria, y he sido docente universitario desde 2011.</p>
+      <ul>
+        <li>Ingeniero en Robótica Industrial, Instituto Politécnico Nacional</li>
+        <li>Doctor en Gestión y Políticas de Innovación, IPN</li>
+        <li>Docente de sensores, control automático y proyectos con Arduino en nivel universitario</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="contacto" aria-labelledby="h-contacto">
+    <h2 id="h-contacto" class="tag" style="font-size:.78rem">Contacto</h2>
+    <div class="contact">
+      <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+        <strong>Luis Pablo Murillo Tovar</strong>
+        <span class="mail">lpmurillotovar@gmail.com</span>
+      </div>
+      <button class="btn primary" id="copy" type="button">Copiar correo</button>
+    </div>
+  </section>
+
+  <footer>Mérida, Yucatán · Programación y robótica educativa</footer>
+</div>
+
+<script>
+  /* Para mostrar el videojuego: pega aquí el código de tu proyecto publicado en MakeCode Arcade
+     (la parte que va después de makecode.com/, por ejemplo "_AbC123xyz"). */
+  const ARCADE_ID = "";
+
+  if (ARCADE_ID) {
+    const f = document.getElementById("arcade-frame");
+    f.classList.remove("empty");
+    f.innerHTML = "";
+    const ifr = document.createElement("iframe");
+    ifr.src = "https://arcade.makecode.com/---run?id=" + encodeURIComponent(ARCADE_ID);
+    ifr.title = "Videojuego en MakeCode Arcade";
+    ifr.setAttribute("allowfullscreen", "");
+    ifr.setAttribute("sandbox", "allow-popups allow-forms allow-scripts allow-same-origin");
+    f.appendChild(ifr);
+  }
+
+  document.getElementById("copy").addEventListener("click", async (e) => {
+    const t = "lpmurillotovar@gmail.com";
+    try { await navigator.clipboard.writeText(t); e.target.textContent = "Correo copiado"; }
+    catch (_) {
+      const r = document.createRange(); r.selectNodeContents(document.querySelector(".mail"));
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r); e.target.textContent = "Selecciona y copia";
+    }
+  });
+</script>
 </body>
 </html>
